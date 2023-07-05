@@ -1,0 +1,64 @@
+<?php
+// Database connection
+$servername = "localhost";
+$username = "your_username";
+$password = "your_password";
+$dbname = "your_database_name";
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Function to upload a new product
+function addProduct($name, $description, $price, $tags, $variations, $image)
+{
+    global $conn;
+
+    // Prepare and execute the SQL query to insert the product into the database
+    $stmt = $conn->prepare("INSERT INTO products (name, description, price, tags, variations, image) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("ssdsss", $name, $description, $price, $tags, $variations, $image);
+    $stmt->execute();
+    $stmt->close();
+}
+
+// Function to remove a product
+function removeProduct($productId)
+{
+    global $conn;
+
+    // Prepare and execute the SQL query to delete the product from the database
+    $stmt = $conn->prepare("DELETE FROM products WHERE id = ?");
+    $stmt->bind_param("i", $productId);
+    $stmt->execute();
+    $stmt->close();
+}
+
+// Handle form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (isset($_POST["action"])) {
+        if ($_POST["action"] == "add") {
+            // Get form inputs
+            $name = $_POST["productName"];
+            $description = $_POST["productDescription"];
+            $price = floatval($_POST["productPrice"]);
+            $tags = $_POST["productTags"];
+            $variations = $_POST["productVariations"];
+            $image = $_FILES["productImage"]["name"]; // Assumes the image is stored in the same directory as this PHP file
+
+            // Upload image to the server (you may need to adjust the destination path)
+            $uploadPath = "uploads/" . $image;
+            move_uploaded_file($_FILES["productImage"]["tmp_name"], $uploadPath);
+
+            // Add product to the database
+            addProduct($name, $description, $price, $tags, $variations, $uploadPath);
+        } elseif ($_POST["action"] == "remove") {
+            // Get the product ID to remove
+            $productId = $_POST["productId"];
+
+            // Remove product from the database
+            removeProduct($productId);
+        }
+    }
+}
+?>
