@@ -1,0 +1,55 @@
+window.addEventListener('load', function() {
+  var productForm = document.getElementById('productForm');
+  var productList = document.getElementById('productList');
+  var products = []; // Array to store product objects
+
+  productForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    var productName = document.getElementById('productName').value;
+    var productDescription = document.getElementById('productDescription').value;
+    var productImage = document.getElementById('productImage').value;
+    var productPrice = parseFloat(document.getElementById('productPrice').value);
+    var productTags = document.getElementById('productTags').value.split(',');
+    var productVariations = document.getElementById('productVariations').value.split('\n');
+
+    // Create a new product object
+    var product = {
+      name: productName,
+      description: productDescription,
+      image: productImage,
+      price: productPrice,
+      tags: productTags,
+      variations: productVariations
+    };
+
+    // Add product to the array
+    products.push(product);
+
+    // Add product to the list
+    var li = document.createElement('li');
+    li.innerHTML = '<strong>' + productName + '</strong>: ' + productDescription + ' ($' + productPrice + ') <button class="remove-btn" data-index="' + (products.length - 1) + '">Remove</button><br>Tags: ' + productTags.join(', ') + '<br>Variations: ' + productVariations.join('<br>');
+    productList.appendChild(li);
+
+    // Clear form inputs
+    document.getElementById('productName').value = '';
+    document.getElementById('productDescription').value = '';
+    document.getElementById('productImage').value = '';
+    document.getElementById('productPrice').value = '';
+    document.getElementById('productTags').value = '';
+    document.getElementById('productVariations').value = '';
+  });
+
+  productList.addEventListener('click', function(event) {
+    if (event.target.classList.contains('remove-btn')) {
+      var index = event.target.getAttribute('data-index');
+      if (index !== null) {
+        // Remove the product from the array
+        products.splice(index, 1);
+
+        // Remove the product from the list
+        event.target.parentElement.remove();
+      }
+    }
+  });
+});
